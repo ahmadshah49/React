@@ -59,7 +59,7 @@ const Navbar = () => {
               }`
             }
           >
-           User
+            User
           </NavLink>
         </li>
       </ul>
