@@ -10,10 +10,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/collection/:slug" element={<CollectionPage />} />
-        <Route
-          path="/assests/:chain/:contract/:id"
-          element={<NFTDetailPage />}
-        />
+        <Route path="/nft/:chain/:address/:id" element={<NFTDetailPage />} />
       </Routes>
     </Router>
   );

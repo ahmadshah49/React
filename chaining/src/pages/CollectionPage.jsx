@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import axiosInstance from "../axiosInstance";
+
 const CollectionPage = () => {
-  const { slug, chain } = useParams();
+  const { slug } = useParams();
   const [nfts, setNfts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [collections, setCollections] = useState([]);
 
   useEffect(() => {
     const fetchNFTs = async () => {
@@ -12,7 +14,6 @@ const CollectionPage = () => {
         const response = await axiosInstance.get(
           `https://api.opensea.io/api/v2/collection/${slug}/nfts`
         );
-        console.log(response.data.nfts);
         setNfts(response.data.nfts);
         setLoading(false);
       } catch (error) {
@@ -24,6 +25,36 @@ const CollectionPage = () => {
     fetchNFTs();
   }, [slug]);
 
+  useEffect(() => {
+    const fetchCollections = async () => {
+      try {
+        const response = await axiosInstance.get(
+          "https://api.opensea.io/api/v2/collections?order_by=seven_day_volume&order_direction=desc"
+        );
+        setCollections(
+          response.data.collections.sort((a, b) => {
+            return new Date(a.created_date) - new Date(b.created_date);
+          })
+        );
+      } catch (error) {
+        console.error("Error fetching collections:", error);
+      }
+    };
+
+    fetchCollections();
+  }, []);
+
+  const getContractChain = (contractAddress) => {
+    for (const collection of collections) {
+      for (const contract of collection.contracts) {
+        if (contract.address === contractAddress) {
+          return contract.chain;
+        }
+      }
+    }
+    return null;
+  };
+
   return (
     <div>
       <h1 className="text-red-400 bg-black py-6 text-4xl font-bold">
@@ -32,7 +63,7 @@ const CollectionPage = () => {
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <div className="flex flex-wrap justify-center ">
+        <div className="flex flex-wrap justify-center">
           {nfts.map((nft) => (
             <div
               key={nft.id}
@@ -47,14 +78,13 @@ const CollectionPage = () => {
               <p className="mt-2 text-sm">{nft.description}</p>
               <p className="mt-2 text-sm">{nft.names}</p>
               <Link
-                // to={/nft/${nft.chain}/${nft.contract}/${nft.id}}
-                // to={/nft/${nft.chain}/${nft.contract}/${nft.id}}
-                // to={/nft/${nft.collection}/${nft.identifier}}
-                // to={/nft/arbitrum/0x990eb28e378659b93a29d46ff41f08dc6316dd98/10000} ok
-                // to={/nft/arbitrum/${nft.contract}/${nft.identifier}} ok
-                to={`/assests/${chain}/${nft.contract}/${nft.identifier}`}
+                key={nft.id}
+                to={`/nft/${getContractChain(nft.contract)}/${nft.contract}/${
+                  nft.identifier
+                }`}
+                className="text-blue-500"
               >
-                View Details
+                View NFT
               </Link>
             </div>
           ))}
