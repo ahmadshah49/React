@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.class-grid {
+  display: flex;
+  flex-wrap: nowrap;
+}
